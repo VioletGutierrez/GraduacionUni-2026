@@ -1,0 +1,16 @@
+sequenceDiagram
+    autonumber
+    actor E as Estudiante
+    participant W as Aplicación Web
+    participant A as API REST
+    participant DB as SQLite
+
+    E->>W: Completa formulario de propuesta
+    W->>A: POST /api/projects (con JWT)
+    activate A
+    A->>A: Validar DTO y reglas
+    A->>DB: Crear proyecto
+    DB-->>A: Id del proyecto
+    A-->>W: 201 Created + proyecto
+    deactivate A
+    W-->>E: Mostrar número de proyecto

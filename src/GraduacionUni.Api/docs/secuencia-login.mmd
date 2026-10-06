@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    actor E as Estudiante
+    participant W as Aplicación Web
+    participant A as API REST
+    participant DB as SQLite
+
+    E->>W: Ingresa correo y contraseña
+    W->>A: POST /api/auth/login
+    activate A
+    A->>DB: Buscar usuario por correo
+    DB-->>A: Usuario + hash
+    A->>A: Verificar contraseña con IPasswordHasher
+    alt Credenciales válidas
+        A-->>W: 200 OK + token JWT
+        W-->>E: Mostrar panel principal
+    else Credenciales inválidas
+        A-->>W: 401 Unauthorized
+        W-->>E: Mostrar error
+    end
+    deactivate A
