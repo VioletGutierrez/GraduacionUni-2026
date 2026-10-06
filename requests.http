@@ -1,0 +1,91 @@
+### Variables
+@host = http://localhost:5192
+@token = PEGAR_TOKEN_AQUI
+
+### ============================================================
+### 1. Registrar usuario Estudiante
+### ============================================================
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "estudiante@uni.edu.ni",
+  "password": "Test1234!",
+  "role": "Estudiante"
+}
+
+### ============================================================
+### 2. Registrar usuario Tutor
+### ============================================================
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "tutor@uni.edu.ni",
+  "password": "Test1234!",
+  "role": "Tutor"
+}
+
+### ============================================================
+### 3. Login (copiar token de la respuesta)
+### ============================================================
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "estudiante@uni.edu.ni",
+  "password": "Test1234!"
+}
+
+### ============================================================
+### 4. Crear proyecto (requiere token)
+### ============================================================
+POST {{host}}/api/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Sistema de gestión académica",
+  "description": "Proyecto de prueba UNI",
+  "studentId": 1
+}
+
+### ============================================================
+### 5. Listar mis proyectos
+### ============================================================
+GET {{host}}/api/projects/mine
+Authorization: Bearer {{token}}
+
+### ============================================================
+### 6. Consultar proyecto por ID
+### ============================================================
+GET {{host}}/api/projects/1
+Authorization: Bearer {{token}}
+
+### ============================================================
+### 7. Cambiar estado (requiere rol Tutor/Coordinador/Admin)
+### ============================================================
+PATCH {{host}}/api/projects/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Revisión"
+}
+
+### ============================================================
+### 8. Crear revisión (requiere rol Tutor/Coordinador/Admin)
+### ============================================================
+POST {{host}}/api/projects/1/reviews
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "comment": "El planteamiento del problema está bien, pero falta detalle en los objetivos específicos."
+}
+
+### ============================================================
+### 9. Listar revisiones de un proyecto
+### ============================================================
+GET {{host}}/api/projects/1/reviews
+Authorization: Bearer {{token}}
