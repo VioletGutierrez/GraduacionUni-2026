@@ -7,6 +7,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Project> Projects => Set<Project>();
+    public DbSet<Review> Reviews => Set<Review>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,6 +18,19 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<Project>()
             .HasOne(x => x.Student)
             .WithMany(x => x.Projects)
-            .HasForeignKey(x => x.StudentId);
+            .HasForeignKey(x => x.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(x => x.Project)
+            .WithMany(x => x.Reviews)
+            .HasForeignKey(x => x.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(x => x.Tutor)
+            .WithMany(x => x.Reviews)
+            .HasForeignKey(x => x.TutorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

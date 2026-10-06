@@ -7,4 +7,5 @@ public sealed class User
     public required string PasswordHash { get; set; }
     public required string Role { get; set; }
     public ICollection<Project> Projects { get; set; } = new List<Project>();
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

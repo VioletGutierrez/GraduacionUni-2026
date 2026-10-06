@@ -8,4 +8,5 @@ public sealed class Project
     public string Status { get; set; } = "Propuesta";
     public int StudentId { get; set; }
     public User? Student { get; set; }
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

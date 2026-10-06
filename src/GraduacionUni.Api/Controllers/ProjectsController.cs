@@ -1,3 +1,4 @@
+using GraduacionUni.Api.Application.DTOs;
 using GraduacionUni.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,9 @@ namespace GraduacionUni.Api.Controllers;
 [Authorize]
 public sealed class ProjectsController(AppDbContext db) : ControllerBase
 {
+    private static readonly string[] ValidStatuses =
+        { "Propuesta", "Revisión", "Aprobada", "En desarrollo", "Defensa", "Cerrada" };
+
     [HttpGet("mine")]
     public async Task<IActionResult> GetMine(CancellationToken ct)
     {
@@ -31,7 +35,22 @@ public sealed class ProjectsController(AppDbContext db) : ControllerBase
         var project = await db.Projects
             .AsNoTracking()
             .Where(p => p.Id == id)
-            .Select(p => new { p.Id, p.Title, p.Description, p.Status, p.StudentId })
+            .Select(p => new
+            {
+                p.Id,
+                p.Title,
+                p.Description,
+                p.Status,
+                p.StudentId,
+                Reviews = p.Reviews.Select(r => new
+                {
+                    r.Id,
+                    r.Comment,
+                    r.Status,
+                    r.TutorId,
+                    r.CreatedAt
+                }).ToList()
+            })
             .SingleOrDefaultAsync(ct);
 
         return project is null ? NotFound() : Ok(project);
@@ -55,6 +74,25 @@ public sealed class ProjectsController(AppDbContext db) : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = project.Id },
             new { project.Id, project.Title, project.Status });
+    }
+
+    [HttpPatch("{id:int}/status")]
+    [Authorize(Roles = "Tutor,Coordinador,Administrador")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Status) || !ValidStatuses.Contains(request.Status))
+            return BadRequest(new
+            {
+                error = $"Estado inválido. Válidos: {string.Join(", ", ValidStatuses)}"
+            });
+
+        var project = await db.Projects.FindAsync(new object[] { id }, ct);
+        if (project is null) return NotFound();
+
+        project.Status = request.Status;
+        await db.SaveChangesAsync(ct);
+
+        return Ok(new { project.Id, project.Title, project.Status });
     }
 }
 
